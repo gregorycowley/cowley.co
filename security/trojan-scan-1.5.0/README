@@ -1,0 +1,87 @@
+$Id: README,v 1.9 2013/04/19 21:16:34 jeroend Exp $
+
+Trojan Scan README 1.5.0
+=========================
+
+Trojan Scan is a simple shell script that allows for simple but relatively
+effective checking for trojans, rootkits and other malware that may be using
+your server and network for unwanted (and possibly illegal) purposes. Since
+this script is relatively simple don't expect it to catch them all, but it
+helps to find these programs on e.g. shared servers. On those machines lots
+of users install many kinds of applications. These applications may introduce
+new vulnerabilities which would perhaps otherwise not be detected if not for
+a very alert sysadmin.
+
+It works by listing all process that use the Internet with the lsof command
+(using -Pni flags). This list is then transformed into signatures in the form
+of:
+    <process_name>:<protocol>:<port_number_in>:<port_number_out>:<user>
+
+These signatures then are matched against the allowed process defined in the
+configuration. If any signatures of running processes are found that do not
+match the allowed signatures, an email report is sent including ps, ls, and
+optional lsof output for the unknown processes (see also: lsof).
+
+The script is relatively easy in use:
+
+   1.  Install into /etc/trojan-scan/trojan-scan.conf and
+       /usr/local/sbin/trojan-scan.sh
+   2a. Use the following to generate a default configuration
+  	 trojan-scan -C /etc/trojan-scan/trojan-scan.conf
+       check, update and test configuration (test using -n flag),
+       or
+   2b. configure email address (RECIPIENTS), allowed processes (ALLOWED),
+       optionally lsof MD5 (LSOF_MD5, use complete md5(sum) command output) in
+       trojan-scan.conf, using e.g.:
+       	 echo "LSOF_MD5=\"`md5 \`which /usr/sbin/lsof\``\"" \
+	   >> /etc/trojan-scan/trojan-scan.conf
+   3. Add to crontab using e.g:
+        */5 * * * * /usr/local/sbin/trojan-scan.sh -F
+      This will run every 5 minutes, including full lsof listing in email
+      report. (NB: depending on the load of your server you may need to
+      increase this interval.)
+
+Now that the script has support for inbound/outbound configuration, it may be
+considered as too strict, since it requires you to either supply all programs
+that use outbound connections such as e.g. DNS queries, request web pages or
+email, or supply some rules that always allow some designated outbound
+connections. For example to allow every user, every process to use DNS, use
+the following rule:
+
+	ALLOWED="$ALLOWED !@any@!:UDP:!@any@!:53:!@any@!"
+
+However, this defeats any malware using outbound UDP port 53 to communicate.
+
+Test with:
+  /usr/local/sbin/trojan-scan.sh -n
+
+Other flags:
+-d	 	debug mode
+-F	 	full output
+-n	 	do not send email
+-v	 	verbose mode
+-x	 	shell debug
+-C file		generate default configuration file
+
+The current paths of the programs used (such as lsof, sed, awk, etc) can be
+overridden in the configuration file by defining them just like in the
+program file (e.g. SED=/usr/bin/sed). To generate a default configuration
+for a known-good system, use:
+  trojan-scan -C /etc/trojan-scan/trojan-scan.conf
+
+
+Copyright (c) 2005,2007,2011,2013 Derks.IT / Jeroen Derks
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. 
+
+# vim:set ts=8 sw=8:

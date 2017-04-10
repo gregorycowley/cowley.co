@@ -1,0 +1,12 @@
+$Id: TODO,v 1.5 2013/04/19 21:16:34 jeroend Exp $
+
+Trojan Scan TODO
+==================
+
+This files contains the current list of TODO's that need to be implemented in
+future version(s) in order of preference:
+
+- improve scan algorithm to process less duplicate process records
+- create forum/mailing list
+- update signature to contain full path
+- improve documentation
